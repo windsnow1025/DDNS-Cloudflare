@@ -10,6 +10,12 @@ A desktop and CLI app for automatic DDNS management on Cloudflare.
 2. Install pnpm: `npm install -g pnpm`
 3. Install dependencies: `pnpm install`
 
+#### Update Package Manager
+
+```bash
+pnpm self-update
+```
+
 ### WebStorm
 
 Settings >> Languages & Frameworks >> JavaScript Runtime >> Package manager: `~\AppData\Roaming\npm\pnpm.cmd`
