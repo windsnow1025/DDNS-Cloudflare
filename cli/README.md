@@ -11,7 +11,7 @@ npx ddns-cloudflare-cli
 or
 
 ```bash
-npm install -g ddns-cloudflare-cli
+npm install -g ddns-cloudflare-cli@latest
 ddns-cloudflare
 ```
 
