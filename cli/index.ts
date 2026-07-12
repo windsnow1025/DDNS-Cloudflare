@@ -66,8 +66,8 @@ async function poll(config: Config): Promise<void> {
     console.log(`[${timestamp()}] Checking DNS records...`);
     try {
       for await (const statuses of ddnsService.processUpdates()) {
-        for (const {record, updated} of statuses) {
-          const status = updated ? "UPDATED" : "OK";
+        for (const {record, updated, error} of statuses) {
+          const status = error ? `FAILED: ${error}` : updated ? "UPDATED" : "OK";
           console.log(`  ${record.name} (${record.type}): ${record.content} [${status}]`);
         }
       }

@@ -5,6 +5,7 @@ type DNSRecord = Cloudflare.DNS.Records.RecordResponse.ARecord | Cloudflare.DNS.
 interface RecordStatus {
   record: DNSRecord;
   updated: boolean;
+  error?: string;
 }
 
 export type {RecordStatus};
@@ -52,7 +53,8 @@ export class DDNS_Service {
         ip = await this.fetchCurrentIp(dnsRecord.type);
       } catch {
         const ipType = dnsRecord.type === "A" ? "IPv4" : "IPv6";
-        throw new Error(`Failed to fetch current ${ipType}`);
+        results.push({record: dnsRecord, updated: false, error: `Failed to fetch current ${ipType}`});
+        continue;
       }
 
       if (ip !== dnsRecord.content) {

@@ -266,8 +266,8 @@ function App() {
                         <TableCell>{s.record.content}</TableCell>
                         <TableCell>
                           <Chip
-                            label={s.updated ? "updated" : "up to date"}
-                            color={s.updated ? "primary" : "default"}
+                            label={s.error ? "failed" : s.updated ? "updated" : "up to date"}
+                            color={s.error ? "error" : s.updated ? "primary" : "default"}
                             size="small"
                             variant="outlined"
                           />
