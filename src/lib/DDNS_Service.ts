@@ -112,6 +112,9 @@ export class DDNS_Service {
       queryUrl = this.ipv6QueryUrl;
     }
     const response = await fetch(queryUrl);
+    if (!response.ok) {
+      throw new Error(`HTTP ${response.status} for ${queryUrl}`);
+    }
     const ip = await response.text();
     return ip.trim();
   }
