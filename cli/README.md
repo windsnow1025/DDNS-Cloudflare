@@ -16,3 +16,5 @@ ddns-cloudflare
 ```
 
 If no config exists at `~/.ddns-cloudflare/config.json`, the CLI will prompt for setup (Cloudflare credentials, DNS records, IP service URLs). Then it starts polling and updating DNS records every 10 seconds.
+
+`ddns-cloudflare --version` prints the version.

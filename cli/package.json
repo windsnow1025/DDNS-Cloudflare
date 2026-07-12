@@ -1,6 +1,6 @@
 {
   "name": "ddns-cloudflare-cli",
-  "version": "1.2.1",
+  "version": "1.3.0",
   "description": "CLI for automatic DDNS management on Cloudflare",
   "bin": {
     "ddns-cloudflare": "./dist/cli/index.js"

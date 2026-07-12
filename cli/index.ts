@@ -4,6 +4,7 @@ import {setTimeout} from "node:timers/promises";
 import {Temporal} from "@js-temporal/polyfill";
 import {Config, DefaultIPv4URLs, DefaultIPv6URLs, loadConfig, saveConfig} from "../src/lib/ConfigService";
 import {DDNS_Service} from "../src/lib/DDNS_Service";
+import {version} from "./package.json";
 
 async function prompt(rl: readline.Interface, question: string): Promise<string> {
   return (await rl.question(question)).trim();
@@ -88,6 +89,11 @@ function isConfigEmpty(config: Config): boolean {
 }
 
 async function main(): Promise<void> {
+  if (process.argv.includes("--version")) {
+    console.log(version);
+    return;
+  }
+
   let config = loadConfig();
 
   while (isConfigEmpty(config)) {
