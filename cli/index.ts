@@ -1,13 +1,12 @@
 #!/usr/bin/env node
-import readline from "node:readline";
+import readline from "node:readline/promises";
+import {setTimeout} from "node:timers/promises";
 import {Temporal} from "@js-temporal/polyfill";
 import {Config, DefaultIPv4URLs, DefaultIPv6URLs, loadConfig, saveConfig} from "../src/lib/ConfigService";
 import {DDNS_Service} from "../src/lib/DDNS_Service";
 
-function prompt(rl: readline.Interface, question: string): Promise<string> {
-  return new Promise((resolve) => {
-    rl.question(question, (answer) => resolve(answer.trim()));
-  });
+async function prompt(rl: readline.Interface, question: string): Promise<string> {
+  return (await rl.question(question)).trim();
 }
 
 async function interactiveConfig(): Promise<void> {
@@ -79,7 +78,7 @@ async function poll(config: Config): Promise<void> {
 
     for (let i = 0; i < 10; i++) {
       if (!running) break;
-      await new Promise((resolve) => setTimeout(resolve, 1000));
+      await setTimeout(1000);
     }
   }
 }
