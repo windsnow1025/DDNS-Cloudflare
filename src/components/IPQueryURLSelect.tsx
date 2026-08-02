@@ -11,20 +11,14 @@ import Select from "@mui/material/Select";
 import TextField from "@mui/material/TextField";
 import DeleteIcon from "@mui/icons-material/Delete";
 
-interface IPQueryURLSelectProps {
+function IPQueryURLSelect({label, defaultURLs, customOptions, onCustomOptionsChange, value, onChange}: {
   label: string;
   defaultURLs: readonly string[];
   customOptions: string[];
   onCustomOptionsChange: (options: string[]) => void;
   value: string;
   onChange: (value: string) => void;
-}
-
-function IPQueryURLSelect({
-  label, defaultURLs,
-  customOptions, onCustomOptionsChange,
-  value, onChange,
-}: IPQueryURLSelectProps) {
+}) {
   const [newUrl, setNewUrl] = useState("");
 
   const allOptions = useMemo(

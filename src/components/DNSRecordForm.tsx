@@ -7,12 +7,10 @@ import TextField from "@mui/material/TextField";
 import Button from "@mui/material/Button";
 import DeleteIcon from "@mui/icons-material/Delete";
 
-interface DNSRecordFormProps {
+function DNSRecordForm({dnsRecordNames, setDnsRecordNames}: {
   dnsRecordNames: string[];
   setDnsRecordNames: (value: string[]) => void;
-}
-
-function DNSRecordForm({dnsRecordNames, setDnsRecordNames}: DNSRecordFormProps) {
+}) {
   const [newName, setNewName] = useState("");
 
   const handleAdd = () => {

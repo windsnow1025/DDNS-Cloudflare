@@ -1,16 +1,11 @@
 import TextField from "@mui/material/TextField";
 
-interface GlobalConfigFormProps {
+function GlobalConfigForm({cloudflareEmail, setCloudflareEmail, cloudflareApiKey, setCloudflareApiKey}: {
   cloudflareEmail: string;
   setCloudflareEmail: (value: string) => void;
   cloudflareApiKey: string;
   setCloudflareApiKey: (value: string) => void;
-}
-
-function GlobalConfigForm({
-  cloudflareEmail, setCloudflareEmail,
-  cloudflareApiKey, setCloudflareApiKey,
-}: GlobalConfigFormProps) {
+}) {
   return (
     <div className="flex-column gap-3">
       <TextField

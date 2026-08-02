@@ -1,12 +1,10 @@
 import FormControlLabel from "@mui/material/FormControlLabel";
 import Switch from "@mui/material/Switch";
 
-interface AutoStartSwitchProps {
+function AutoStartSwitch({autoStart, setAutoStart}: {
   autoStart: boolean;
   setAutoStart: (value: boolean) => void;
-}
-
-function AutoStartSwitch({autoStart, setAutoStart}: AutoStartSwitchProps) {
+}) {
   return (
     <FormControlLabel
       control={
