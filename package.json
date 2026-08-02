@@ -47,7 +47,8 @@
     "eslint": "9.26.0",
     "eslint-plugin-import": "^2.32.0",
     "typescript": "6.0.3",
-    "vite": "^6.4.3"
+    "vite": "^8.2.0",
+    "vitest": "^4.1.10"
   },
   "dependencies": {
     "@emotion/react": "^11.14.0",
