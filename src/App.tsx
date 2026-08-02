@@ -5,57 +5,20 @@ import Card from "@mui/material/Card";
 import CardContent from "@mui/material/CardContent";
 import Chip from "@mui/material/Chip";
 import Container from "@mui/material/Container";
-import IconButton from "@mui/material/IconButton";
 import Snackbar from "@mui/material/Snackbar";
 import Table from "@mui/material/Table";
 import TableBody from "@mui/material/TableBody";
 import TableCell from "@mui/material/TableCell";
 import TableRow from "@mui/material/TableRow";
-import Tooltip from "@mui/material/Tooltip";
 import Typography from "@mui/material/Typography";
-import {useColorScheme} from "@mui/material/styles";
 import {Temporal} from "@js-temporal/polyfill";
-import ContrastIcon from "@mui/icons-material/Contrast";
-import DarkModeIcon from "@mui/icons-material/DarkMode";
-import LightModeIcon from "@mui/icons-material/LightMode";
 import AutoStartSwitch from "./components/AutoStartSwitch";
 import DNSRecordForm from "./components/DNSRecordForm";
 import GlobalConfigForm from "./components/GlobalConfigForm";
 import IPQueryURLSelect from "./components/IPQueryURLSelect";
+import ThemeSwitch from "./components/ThemeSwitch";
 import {DefaultIPv4URLs, DefaultIPv6URLs, DefaultConfig} from "./lib/Config";
 import {DDNS_Service, RecordStatus} from "./lib/DDNS_Service";
-
-const ThemeCycle = ["system", "dark", "light"] as const;
-
-function ThemeSwitch() {
-  const {mode, setMode} = useColorScheme();
-
-  const nextMode = () => {
-    const currentIndex = ThemeCycle.indexOf(mode ?? "system");
-    const next = ThemeCycle[(currentIndex + 1) % ThemeCycle.length];
-    setMode(next);
-  };
-
-  const icon = mode === "dark"
-    ? <DarkModeIcon/>
-    : mode === "light"
-      ? <LightModeIcon/>
-      : <ContrastIcon/>;
-
-  const label = mode === "dark"
-    ? "Dark"
-    : mode === "light"
-      ? "Light"
-      : "System";
-
-  return (
-    <Tooltip title={`Theme: ${label}`}>
-      <IconButton onClick={nextMode}>
-        {icon}
-      </IconButton>
-    </Tooltip>
-  );
-}
 
 function SectionCard({title, children}: {title: string; children: React.ReactNode}) {
   return (
