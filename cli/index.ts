@@ -4,6 +4,7 @@ import {setTimeout} from "node:timers/promises";
 import {Temporal} from "@js-temporal/polyfill";
 import {Config, DefaultIPv4URLs, DefaultIPv6URLs, loadConfig, saveConfig} from "../src/lib/ConfigService";
 import {DDNS_Service} from "../src/lib/DDNS_Service";
+import {decryptAES, encryptAES} from "../src/lib/EncryptionService";
 import {version} from "./package.json";
 
 async function prompt(rl: readline.Interface, question: string): Promise<string> {
@@ -28,8 +29,23 @@ async function interactiveConfig(): Promise<void> {
   const email = await prompt(rl, `Cloudflare Email [${config.cloudflareEmail}]: `);
   if (email) config.cloudflareEmail = email;
 
-  const apiKey = await prompt(rl, `Cloudflare API Key [${config.cloudflareApiKey ? "****" : ""}]: `);
-  if (apiKey) config.cloudflareApiKey = apiKey;
+  const apiKey = await prompt(rl, `Cloudflare API Key [${config.cloudflareApiKeyEncrypted ? "****" : ""}]: `);
+  if (apiKey) {
+    while (true) {
+      const passphrase = await prompt(rl, "New Passphrase: ");
+      if (!passphrase) {
+        console.log("Passphrase is required.");
+        continue;
+      }
+      const confirmation = await prompt(rl, "Confirm Passphrase: ");
+      if (passphrase !== confirmation) {
+        console.log("Passphrases do not match.");
+        continue;
+      }
+      config.cloudflareApiKeyEncrypted = await encryptAES(apiKey, passphrase);
+      break;
+    }
+  }
 
   const records = await prompt(rl, `DNS Record Names (comma-separated) [${config.dnsRecordNames.join(", ")}]: `);
   if (records) config.dnsRecordNames = records.split(",").map((s) => s.trim()).filter((s) => s !== "");
@@ -40,16 +56,30 @@ async function interactiveConfig(): Promise<void> {
   console.log("\nConfig saved.");
 }
 
+async function unlockApiKey(config: Config): Promise<string> {
+  const rl = readline.createInterface({input: process.stdin, output: process.stdout});
+  while (true) {
+    const passphrase = await prompt(rl, "Passphrase: ");
+    try {
+      const apiKey = await decryptAES(config.cloudflareApiKeyEncrypted, passphrase);
+      rl.close();
+      return apiKey;
+    } catch {
+      console.log("Passphrase is incorrect.");
+    }
+  }
+}
+
 function timestamp(): string {
   return Temporal.Now.instant().toString();
 }
 
-async function poll(config: Config): Promise<void> {
+async function poll(config: Config, apiKey: string): Promise<void> {
   const ddnsService = new DDNS_Service(
     config.ipv4QueryUrl,
     config.ipv6QueryUrl,
     config.cloudflareEmail,
-    config.cloudflareApiKey,
+    apiKey,
     config.dnsRecordNames,
   );
 
@@ -85,7 +115,7 @@ async function poll(config: Config): Promise<void> {
 }
 
 function isConfigEmpty(config: Config): boolean {
-  return !config.cloudflareEmail || !config.cloudflareApiKey || config.dnsRecordNames.length === 0;
+  return !config.cloudflareEmail || !config.cloudflareApiKeyEncrypted || config.dnsRecordNames.length === 0;
 }
 
 async function main(): Promise<void> {
@@ -102,13 +132,15 @@ async function main(): Promise<void> {
     config = loadConfig();
   }
 
+  const apiKey = await unlockApiKey(config);
+
   console.log(`[${timestamp()}] Starting DDNS Cloudflare CLI`);
   console.log(`  IPv4 URL: ${config.ipv4QueryUrl}`);
   console.log(`  IPv6 URL: ${config.ipv6QueryUrl}`);
   console.log(`  Records: ${config.dnsRecordNames.join(", ")}`);
   console.log();
 
-  await poll(config);
+  await poll(config, apiKey);
 }
 
 main();
