@@ -114,12 +114,16 @@ function App() {
   };
 
   useEffect(() => {
+    if (!isUpdating) return;
+    window.configAPI.saveConfig(currentConfig);
+  }, [isUpdating, ipv4QueryUrl, ipv6QueryUrl, JSON.stringify(ipv4CustomOptions), JSON.stringify(ipv6CustomOptions), cloudflareEmail, cloudflareApiKey, JSON.stringify(dnsRecordNames), autoStart]);
+
+  useEffect(() => {
     if (!isUpdating) {
       setStatusEntries([]);
       setHasError(false);
       return;
     }
-    window.configAPI.saveConfig(currentConfig);
     const cancelFlag = {current: false};
     updateLoop(cancelFlag);
     return () => {
