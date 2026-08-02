@@ -46,7 +46,7 @@
     "electron": "41.1.1",
     "eslint": "9.26.0",
     "eslint-plugin-import": "^2.32.0",
-    "typescript": "5.9.3",
+    "typescript": "6.0.3",
     "vite": "^6.4.3"
   },
   "dependencies": {
@@ -58,7 +58,7 @@
     "@tailwindcss/postcss": "^4.2.2",
     "cloudflare": "^5.2.0",
     "electron-squirrel-startup": "^1.0.1",
-    "postcss": "^8.5.8",
+    "postcss": "8.5.18",
     "react": "^19.2.4",
     "react-dom": "^19.2.4",
     "tailwindcss": "^4.2.2"
