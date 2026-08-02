@@ -16,9 +16,13 @@ import AutoStartSwitch from "./components/AutoStartSwitch";
 import DNSRecordForm from "./components/DNSRecordForm";
 import GlobalConfigForm from "./components/GlobalConfigForm";
 import IPQueryURLSelect from "./components/IPQueryURLSelect";
+import {PassphraseDialogMode} from "./components/PassphraseDialogMode";
+import SetPassphraseDialog from "./components/SetPassphraseDialog";
 import ThemeSwitch from "./components/ThemeSwitch";
+import UnlockPassphraseDialog from "./components/UnlockPassphraseDialog";
 import {DefaultIPv4URLs, DefaultIPv6URLs, DefaultConfig} from "./lib/Config";
 import {DDNS_Service, RecordStatus} from "./lib/DDNS_Service";
+import {decryptAES, encryptAES} from "./lib/EncryptionService";
 
 function SectionCard({title, children}: {title: string; children: React.ReactNode}) {
   return (
@@ -36,16 +40,30 @@ function SectionCard({title, children}: {title: string; children: React.ReactNod
 function App() {
   const [loaded, setLoaded] = useState(false);
 
+  // Config
   const [ipv4QueryUrl, setIpv4QueryUrl] = useState(DefaultConfig.ipv4QueryUrl);
   const [ipv6QueryUrl, setIpv6QueryUrl] = useState(DefaultConfig.ipv6QueryUrl);
   const [ipv4CustomOptions, setIpv4CustomOptions] = useState(DefaultConfig.ipv4CustomOptions);
   const [ipv6CustomOptions, setIpv6CustomOptions] = useState(DefaultConfig.ipv6CustomOptions);
   const [cloudflareEmail, setCloudflareEmail] = useState(DefaultConfig.cloudflareEmail);
-  const [cloudflareApiKey, setCloudflareApiKey] = useState(DefaultConfig.cloudflareApiKey);
+  const [cloudflareApiKeyEncrypted, setCloudflareApiKeyEncrypted] = useState(DefaultConfig.cloudflareApiKeyEncrypted);
   const [dnsRecordNames, setDnsRecordNames] = useState(DefaultConfig.dnsRecordNames);
   const [autoStart, setAutoStart] = useState(DefaultConfig.autoStart);
 
+  const [cloudflareApiKey, setCloudflareApiKey] = useState("");
+  const [passphrase, setPassphrase] = useState("");
+
+  const [passphraseDialogMode, setPassphraseDialogMode] = useState(PassphraseDialogMode.Setup);
+  const [passphraseDialogOpen, setPassphraseDialogOpen] = useState(true);
+  const [passphraseDialogMounted, setPassphraseDialogMounted] = useState(true);
+
   const [isUpdating, setIsUpdating] = useState(false);
+
+  const openPassphraseDialog = () => {
+    setPassphraseDialogMode(PassphraseDialogMode.Setup);
+    setPassphraseDialogMounted(true);
+    setPassphraseDialogOpen(true);
+  };
 
   useEffect(() => {
     window.configAPI.loadConfig().then((config) => {
@@ -54,10 +72,12 @@ function App() {
       setIpv4CustomOptions(config.ipv4CustomOptions);
       setIpv6CustomOptions(config.ipv6CustomOptions);
       setCloudflareEmail(config.cloudflareEmail);
-      setCloudflareApiKey(config.cloudflareApiKey);
+      setCloudflareApiKeyEncrypted(config.cloudflareApiKeyEncrypted);
       setDnsRecordNames(config.dnsRecordNames);
       setAutoStart(config.autoStart);
-      setIsUpdating(config.autoStart);
+      if (config.cloudflareApiKeyEncrypted) {
+        setPassphraseDialogMode(PassphraseDialogMode.Unlock);
+      }
       setLoaded(true);
     });
   }, []);
@@ -74,9 +94,22 @@ function App() {
     ipv4CustomOptions,
     ipv6CustomOptions,
     cloudflareEmail,
-    cloudflareApiKey,
+    cloudflareApiKeyEncrypted,
     dnsRecordNames,
     autoStart,
+  };
+
+  const handleUnlock = async (enteredPassphrase: string) => {
+    let apiKey: string;
+    try {
+      apiKey = await decryptAES(cloudflareApiKeyEncrypted, enteredPassphrase);
+    } catch {
+      return "Passphrase is incorrect";
+    }
+    setCloudflareApiKey(apiKey);
+    setPassphrase(enteredPassphrase);
+    setIsUpdating(autoStart);
+    return null;
   };
 
   const updateLoop = async (cancelFlag: {current: boolean}) => {
@@ -114,9 +147,15 @@ function App() {
   };
 
   useEffect(() => {
-    if (!isUpdating) return;
-    window.configAPI.saveConfig(currentConfig);
-  }, [isUpdating, ipv4QueryUrl, ipv6QueryUrl, JSON.stringify(ipv4CustomOptions), JSON.stringify(ipv6CustomOptions), cloudflareEmail, cloudflareApiKey, JSON.stringify(dnsRecordNames), autoStart]);
+    if (!loaded) return;
+    void (async () => {
+      const encrypted = cloudflareApiKey
+        ? await encryptAES(cloudflareApiKey, passphrase)
+        : cloudflareApiKeyEncrypted;
+      setCloudflareApiKeyEncrypted(encrypted);
+      await window.configAPI.saveConfig({...currentConfig, cloudflareApiKeyEncrypted: encrypted});
+    })();
+  }, [ipv4QueryUrl, ipv6QueryUrl, JSON.stringify(ipv4CustomOptions), JSON.stringify(ipv6CustomOptions), cloudflareEmail, cloudflareApiKey, passphrase, JSON.stringify(dnsRecordNames), autoStart]);
 
   useEffect(() => {
     if (!isUpdating) {
@@ -188,7 +227,35 @@ function App() {
             cloudflareApiKey={cloudflareApiKey}
             setCloudflareApiKey={setCloudflareApiKey}
           />
+          <div className="mt-3">
+            <Button
+              variant="outlined"
+              size="small"
+              disabled={!cloudflareApiKey}
+              onClick={openPassphraseDialog}
+            >
+              Change Passphrase
+            </Button>
+          </div>
         </SectionCard>
+
+        {passphraseDialogMounted && passphraseDialogMode === PassphraseDialogMode.Setup && (
+          <SetPassphraseDialog
+            open={passphraseDialogOpen}
+            onClose={() => setPassphraseDialogOpen(false)}
+            onExited={() => setPassphraseDialogMounted(false)}
+            setPassphrase={setPassphrase}
+          />
+        )}
+        {passphraseDialogMounted && passphraseDialogMode === PassphraseDialogMode.Unlock && (
+          <UnlockPassphraseDialog
+            open={passphraseDialogOpen}
+            onClose={() => setPassphraseDialogOpen(false)}
+            onExited={() => setPassphraseDialogMounted(false)}
+            unlock={handleUnlock}
+            reset={() => setPassphraseDialogMode(PassphraseDialogMode.Setup)}
+          />
+        )}
 
         <SectionCard title="DNS Records">
           <DNSRecordForm

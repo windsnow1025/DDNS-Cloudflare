@@ -14,7 +14,7 @@ interface Config {
   ipv4CustomOptions: string[];
   ipv6CustomOptions: string[];
   cloudflareEmail: string;
-  cloudflareApiKey: string;
+  cloudflareApiKeyEncrypted: string;
   dnsRecordNames: string[];
   autoStart: boolean;
 }
@@ -25,7 +25,7 @@ const DefaultConfig: Config = {
   ipv4CustomOptions: [],
   ipv6CustomOptions: [],
   cloudflareEmail: "",
-  cloudflareApiKey: "",
+  cloudflareApiKeyEncrypted: "",
   dnsRecordNames: [],
   autoStart: false,
 };

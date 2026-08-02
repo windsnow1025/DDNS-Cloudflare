@@ -18,6 +18,7 @@ function GlobalConfigForm({cloudflareEmail, setCloudflareEmail, cloudflareApiKey
       <TextField
         label="Cloudflare API Key"
         type="password"
+        required
         value={cloudflareApiKey}
         onChange={(e) => setCloudflareApiKey(e.target.value)}
         size="small"
