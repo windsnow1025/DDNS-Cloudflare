@@ -43,7 +43,7 @@
     "@types/react-dom": "^19.2.3",
     "@typescript-eslint/eslint-plugin": "^5.62.0",
     "@typescript-eslint/parser": "^5.62.0",
-    "electron": "41.1.1",
+    "electron": "41.10.3",
     "eslint": "9.26.0",
     "eslint-plugin-import": "^2.32.0",
     "typescript": "6.0.3",
